@@ -1,16 +1,16 @@
-﻿using IdentityModel;
-using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace App.Infrastructure.Mail.Initializer { }
 
 public class DbInitializer : IDbInitializer
 {
     private readonly AppDbContext _db;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly UserManager<User> _userManager;
+    private readonly RoleManager<Role> _roleManager;
 
-    public DbInitializer(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    public DbInitializer(AppDbContext db, UserManager<User> userManager, RoleManager<Role> roleManager)
     {
         _db = db;
         _roleManager = roleManager;
@@ -19,76 +19,70 @@ public class DbInitializer : IDbInitializer
 
     public async void InitializeAsync()
     {
-        if (_roleManager.FindByNameAsync(Roles.SuperAdmin).Result == null)
+        try
         {
-            _roleManager.CreateAsync(new IdentityRole(Roles.SuperAdmin)).GetAwaiter().GetResult();
-            _roleManager.CreateAsync(new IdentityRole(Roles.Admin)).GetAwaiter().GetResult();
+            // Apply pending migrations before seeding data
+            if (_db.Database.GetPendingMigrations().Any())
+            {
+                await _db.Database.MigrateAsync();
+            }
+
+            //Check role SuperAdmin exist or no
+            if (!await _roleManager.RoleExistsAsync(Roles.SuperAdmin))
+            {
+                //In case SuperAdmin role not Exist
+                //system run at first time - Create SuperAdmin role and Admin user
+                var roleToAdd = new Role
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = Roles.SuperAdmin,
+                    RoleNameArabic = "مدير النظام",
+                    CreatedById = "System Super Admin"
+                };
+                var newRole = await _roleManager.CreateAsync(roleToAdd);
+
+                //Create User admin and link with the Role was created a top SuperAdmin
+                var adminUser = await CreateAdminUser();
+                //var userNew = _userManager.FindByIdAsync(adminUser.Id).Result;
+
+                var role = await _roleManager.FindByNameAsync(Roles.SuperAdmin);
+                if (role != null)
+                {
+                    var allPermissions = GetAllClaimsPermissions.GetAllControllerActionsUpdated();
+                    UserHelper userHelper = new(_db, _roleManager);
+                    await userHelper.AddClaimsToRole(adminUser, role, allPermissions);
+                }
+            }
+            else
+            {
+                return;
+            }
         }
-        else
+        catch (Exception)
         {
-            //var existAdmin = await _userManager.FindByNameAsync("admin");
-            //if (existAdmin != null)
-            //{
-            //    var claims = _userManager.GetClaimsAsync(existAdmin);
-            //    if (claims != null)
-            //        await _userManager.RemoveClaimsAsync(existAdmin, claims.Result);
-
-            //    var allPermission = GetAllClaimsPermissions.GetAllControllerActionsUpdated();
-            //    await _userManager.AddClaimsAsync(existAdmin, allPermission);
-            //}
-
-            return;
         }
+    }
 
-
-        ApplicationUser adminUser = new ApplicationUser()
+    async Task<User> CreateAdminUser()
+    {
+        User adminUser = new User()
         {
+            Id = Guid.NewGuid().ToString(),
             UserName = "admin",
-            Email = "admin1@gmail.com",
+            Email = "admin@admin.com",
             EmailConfirmed = true,
             PhoneNumber = "111111111111",
             FirstName = "admin",
             LastName = "test",
             UserStatus = true,
+            FirstLogin = true,
             IsActive = true,
-            CreatedBy = "System Super Admin",
-            CreatedDate = DateTime.Now
+            CreatedBy = "System Super Admin"
         };
 
-        _userManager.CreateAsync(adminUser, "Aa@123456").GetAwaiter().GetResult();
-        _userManager.AddToRoleAsync(adminUser, Roles.SuperAdmin).GetAwaiter().GetResult();
-
-        var userNew = _userManager.FindByIdAsync(adminUser.Id).Result;
-        var allPermissions = GetAllClaimsPermissions.GetAllControllerActionsUpdated();
-        var tmp = _userManager.AddClaimsAsync(userNew, allPermissions).Result;
-
-        ApplicationUser customerUser = new ApplicationUser()
-        {
-            UserName = "user",
-            Email = "user@gmail.com",
-            EmailConfirmed = true,
-            PhoneNumber = "111111111111",
-            FirstName = "user",
-            LastName = "test",
-            UserStatus = true,
-            CreatedBy = "System Super Admin",
-            CreatedDate = DateTime.Now
-        };
-
-        _userManager.CreateAsync(customerUser, "Aa@123456").GetAwaiter().GetResult();
-        _userManager.AddToRoleAsync(customerUser, Roles.Admin).GetAwaiter().GetResult();
-
-        //Add permissions into superAdmin user
-        // Get all the user existing claims and delete them
-        //var claims = _userManager.GetClaimsAsync(adminUser);
-        //if (claims != null)
-        //    _userManager.RemoveClaimsAsync(adminUser, claims.Result);
-
-        //// Add all the claims that are selected on the UI
-        //var allPermission = GetAllClaimsPermissions.GetAllControllerActionsUpdated();
-        //_userManager.AddClaimsAsync(adminUser, allPermission);
+        await _userManager.CreateAsync(adminUser, "Aa@123456");
+        await _userManager.AddToRoleAsync(adminUser, Roles.SuperAdmin);
+        return adminUser;
     }
-
-
 }
 

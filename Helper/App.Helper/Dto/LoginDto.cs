@@ -6,17 +6,15 @@ public class LoginDto
 {
     public int Id { get; set; }
 
-    [Required(ErrorMessage = "Username Required Field")]
+    [Required(ErrorMessage = "اسم المستخدم حقل إجباري")]
     public required string Username { get; set; }
 
-    [Required(ErrorMessage = "Password Required Field")]
+    [Required(ErrorMessage = "كلمة المرور حقل إجباري")]
     [DataType(DataType.Password)]
     public required string Password { get; set; }
-    public bool? RememberMe { get; set; }
 
-    public string? a { get; set; }
-    public int? result { get; set; }
-
+    [Required(ErrorMessage = "حقل إجباري")]
+    public string CaptchaInput { get; set; }
     public string? ReturnUrl { get; set; }
 }
 

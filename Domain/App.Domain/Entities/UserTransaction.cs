@@ -9,6 +9,7 @@ public class UserTransaction
     [Key, Column(Order = 0)]
     public int Id { get; set; }
     public string UserId { get; set; }
+    public string IpAddress { get; set; }
     public DateTime? LogginDateTime { get; set; }
     public DateTime? LoggedOutDateTime { get; set; }
 

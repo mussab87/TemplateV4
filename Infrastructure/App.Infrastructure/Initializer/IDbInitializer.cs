@@ -1,4 +1,4 @@
-﻿namespace App.Infrastructure.Mail.Initializer { }
+﻿namespace App.Infrastructure.Initializer { }
 
 public interface IDbInitializer
 {

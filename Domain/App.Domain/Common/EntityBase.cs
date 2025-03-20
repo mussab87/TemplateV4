@@ -8,10 +8,10 @@ public abstract class EntityBase()
     [Key, Column(Order = 0)]
     public int Id { get; set; }
     public string CreatedById { get; set; }
-    public ApplicationUser CreatedBy { get; set; }
-    public DateTime CreatedDate { get; set; }
+    public User CreatedBy { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
     public string LastModifiedById { get; set; }
-    public ApplicationUser LastModifiedBy { get; set; }
-    public DateTime? LastModifiedDate { get; set; }
+    public User LastModifiedBy { get; set; }
+    public DateTime? LastModifiedDate { get; set; } = DateTime.Now;
 }
 

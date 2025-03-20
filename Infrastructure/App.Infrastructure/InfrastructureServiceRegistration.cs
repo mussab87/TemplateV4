@@ -1,76 +1,61 @@
-﻿//using Microsoft.AspNetCore.Authentication.Cookies;
-//using Microsoft.AspNetCore.Identity;
-//using Microsoft.EntityFrameworkCore;
-//using Microsoft.Extensions.Configuration;
-//using Microsoft.Extensions.DependencyInjection;
-//using System;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-//namespace App.Infrastructure { }
+namespace App.Infrastructure { }
 
-//public static class InfrastructureServiceRegistration
-//{
-//    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
-//    {
-//        services.AddEntityFrameworkSqlServer();
-//        services.AddDbContext<AppDbContext>(
-//                    options => options.UseSqlServer(configuration.GetConnectionString("ServiceDBConnection")));
-
-//        services.AddIdentity<ApplicationUser, IdentityRole>(
-//                o =>
-//                {
-//                    // configure identity options
-//                    o.Password.RequireDigit = Convert.ToBoolean(configuration.GetSection("AppSetting:PassRequireDigit").Value);
-//                    o.Password.RequireLowercase = Convert.ToBoolean(configuration.GetSection("AppSetting:PassRequireLowercase").Value);
-//                    o.Password.RequireUppercase = Convert.ToBoolean(configuration.GetSection("AppSetting:PassRequireUppercase").Value);
-//                    o.Password.RequireNonAlphanumeric = Convert.ToBoolean(configuration.GetSection("AppSetting:PassRequireNonAlphanumeric").Value);
-//                    o.Password.RequiredLength = Convert.ToInt32(configuration.GetSection("AppSetting:UserPasswordLength").Value);
-//                })
-//                .AddRoles<IdentityRole>()
-//                .AddRoleManager<RoleManager<IdentityRole>>()
-//                .AddSignInManager<SignInManager<ApplicationUser>>()
-//                .AddEntityFrameworkStores<AppDbContext>()
-//        .AddDefaultTokenProviders();
-
-//        services.ConfigureApplicationCookie(options =>
-//        {
-//            options.ExpireTimeSpan = TimeSpan.FromMinutes(Convert.ToInt32(configuration.GetSection("AppSetting:UserSessionTimeOut").Value));
-//            options.LoginPath = "/Account/Login";
-//            options.SlidingExpiration = true;
-//        });
-
-//        services.Configure<SecurityStampValidatorOptions>(options =>
-//        {
-//            options.ValidationInterval = TimeSpan.Zero;
-//        });
+public static class InfrastructureServiceRegistration
+{
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddEntityFrameworkSqlServer();
+        services.AddDbContext<AppDbContext>(
+                    options => options.UseSqlServer(configuration.GetConnectionString("ServiceDBConnection"))
+                    .LogTo(Console.WriteLine, LogLevel.Information));
 
 
-//        services.AddScoped<IDbInitializer, DbInitializer>();
-//        services.AddScoped(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
-//        services.AddScoped<IRootCompanyRepository, RootCompanyRepository>();
-//        services.AddScoped<ICountryRepository, CountryRepository>();
-//        services.AddScoped<ICityRepository, CityRepository>();
-//        services.AddScoped<IUserRootCompanyRepository, UserRootCompanyRepository>();
-//        services.AddScoped<IForeignAgentRepository, ForeignAgentRepository>();
-//        services.AddScoped<ICVRepository, CVRepository>();
-//        services.AddScoped<ICVStatusRepository, CVStatusRepository>();
-//        services.AddScoped<IAttachmentRepository, AttachmentRepository>();
-//        services.AddScoped<IPreviousEmploymentsRepository, PreviousEmploymentsRepository>();
-//        services.AddScoped<IReligionRepository, ReligionRepository>();
-//        services.AddScoped<IMartialStatusRepository, MartialStatusRepository>();
-//        services.AddScoped<ICVHRPool, CVHRPool>();
-//        services.AddScoped<ICVAttachmentRepository, CVAttachmentRepository>();
-//        services.AddScoped<ICandidateSkillsRepository, CandidateSkillsRepository>();
-//        services.AddScoped<ICVCandidateSkillsRepository, CVCandidateSkillsRepository>();
-//        services.AddScoped<ILocalAgentRepository, LocalAgentRepository>();
-//        services.AddScoped<ILocalSelectedCVRepository, LocalSelectedCVRepository>();
-//        services.AddScoped<ICancelReasonRepository, CancelReasonRepository>();
-//        services.AddScoped<IEducationRepository, EducationRepository>();
-//        services.AddScoped<IDesignationRepository, DesignationRepository>();
 
-//        //services.Configure<EmailSettings>(c => configuration.GetSection("EmailSettings"));
-//        //services.AddTransient<IEmailService, EmailService>();
+        services.AddIdentity<User, Role>(options =>
+        {
+            var appSettings = configuration.GetSection("AppSetting");
 
-//        return services;
-//    }
-//}
+            options.Password.RequireDigit = appSettings.GetValue("PassRequireDigit", true);
+            options.Password.RequireLowercase = appSettings.GetValue("PassRequireLowercase", true);
+            options.Password.RequireUppercase = appSettings.GetValue("PassRequireUppercase", true);
+            options.Password.RequireNonAlphanumeric = appSettings.GetValue("PassRequireNonAlphanumeric", true);
+            options.Password.RequiredLength = appSettings.GetValue("UserPasswordLength", 6);
+
+            // Lockout settings (optional)
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.AllowedForNewUsers = true;
+
+            // User settings (optional)
+            options.User.RequireUniqueEmail = true;
+        })
+    .AddRoleManager<RoleManager<Role>>()
+    .AddSignInManager<SignInManager<User>>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(Convert.ToInt32(configuration.GetSection("AppSetting").GetValue("UserSessionTimeOut", 30)));
+            options.LoginPath = "/Account/Login";
+            options.SlidingExpiration = true;
+        });
+
+        services.Configure<SecurityStampValidatorOptions>(options =>
+        {
+            options.ValidationInterval = TimeSpan.Zero;
+        });
+
+
+        services.AddTransient<IDbInitializer, DbInitializer>();
+
+        return services;
+    }
+}
 

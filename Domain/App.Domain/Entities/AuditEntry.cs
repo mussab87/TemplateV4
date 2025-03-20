@@ -13,6 +13,7 @@ public class AuditEntry
     }
     public EntityEntry Entry { get; }
     public string UserId { get; set; }
+    public string IpAddress { get; set; }
     public string TableName { get; set; }
     public Dictionary<string, object> KeyValues { get; } = new Dictionary<string, object>();
     public Dictionary<string, object> OldValues { get; } = new Dictionary<string, object>();
@@ -23,6 +24,7 @@ public class AuditEntry
     {
         var audit = new Audit();
         audit.UserId = UserId;
+        audit.IpAddress = IpAddress;
         audit.Type = AuditType.ToString();
         audit.TableName = TableName;
         audit.DateTime = DateTime.UtcNow;

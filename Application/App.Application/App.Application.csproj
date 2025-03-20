@@ -8,19 +8,22 @@
 
   <ItemGroup>
     <Compile Remove="Behaviours\**" />
-    <Compile Remove="Contracts\**" />
+    <Compile Remove="Contracts\Repositories\**" />
+    <Compile Remove="Contracts\UserSecurity\**" />
     <Compile Remove="Exceptions\**" />
     <Compile Remove="Features\**" />
     <Compile Remove="Mappings\**" />
     <Compile Remove="Models\**" />
     <EmbeddedResource Remove="Behaviours\**" />
-    <EmbeddedResource Remove="Contracts\**" />
+    <EmbeddedResource Remove="Contracts\Repositories\**" />
+    <EmbeddedResource Remove="Contracts\UserSecurity\**" />
     <EmbeddedResource Remove="Exceptions\**" />
     <EmbeddedResource Remove="Features\**" />
     <EmbeddedResource Remove="Mappings\**" />
     <EmbeddedResource Remove="Models\**" />
     <None Remove="Behaviours\**" />
-    <None Remove="Contracts\**" />
+    <None Remove="Contracts\Repositories\**" />
+    <None Remove="Contracts\UserSecurity\**" />
     <None Remove="Exceptions\**" />
     <None Remove="Features\**" />
     <None Remove="Mappings\**" />
@@ -28,11 +31,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="MediatR" Version="12.4.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.14" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.14" />
   </ItemGroup>
 
   <ItemGroup>

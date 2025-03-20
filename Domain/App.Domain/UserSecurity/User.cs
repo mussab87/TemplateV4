@@ -2,7 +2,7 @@
 
 namespace App.Domain.UserSecurity { }
 
-public class ApplicationUser : IdentityUser
+public class User : IdentityUser<string>
 {
     public string FirstName { get; set; }
     public string LastName { get; set; }
@@ -16,8 +16,8 @@ public class ApplicationUser : IdentityUser
     public bool? IsActive { get; set; }
 
     public string CreatedBy { get; set; }
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public string LastModifiedBy { get; set; }
-    public DateTime? LastModifiedDate { get; set; }
+    public DateTime? LastModifiedDate { get; set; } = DateTime.UtcNow;
 }
 

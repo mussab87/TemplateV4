@@ -35,40 +35,9 @@ public static class GetAllClaimsPermissions
 
         var AllClaims = new List<Claim>();
 
-        //var query = controlleractionlist.GroupBy(x => x.Action).Select(y => y.FirstOrDefault());
         foreach (var item in controlleractionlist)
         {
-            if (item.Controller == "RootCompanyController")
-            {
-                var ClaimNameRoot = "RootCompany" + "-" + item.Action; //+ "-" + item.Controller;
-                var claimRoot = new Claim(ClaimNameRoot, ClaimNameRoot);
-                if (!AllClaims.Exists(c => c.Value == claimRoot.Value))
-                    AllClaims.Add(claimRoot);
-
-                continue;
-            }
-
-            if (item.Controller == "ForeignAgentController")
-            {
-                var ClaimNameRoot = "ForeignAgent" + "-" + item.Action; //+ "-" + item.Controller;
-                var claimRoot = new Claim(ClaimNameRoot, ClaimNameRoot);
-                if (!AllClaims.Exists(c => c.Value == claimRoot.Value))
-                    AllClaims.Add(claimRoot);
-
-                continue;
-            }
-
-            if (item.Controller == "LocalAgentController")
-            {
-                var ClaimNameRoot = "LocalAgent" + "-" + item.Action; //+ "-" + item.Controller;
-                var claimRoot = new Claim(ClaimNameRoot, ClaimNameRoot);
-                if (!AllClaims.Exists(c => c.Value == claimRoot.Value))
-                    AllClaims.Add(claimRoot);
-
-                continue;
-            }
-
-            var ClaimName = "Permission-" + item.Action; //+ "-" + item.Controller;
+            var ClaimName = $"{item.Controller.Replace("Controller", "")} - {item.Action}";
             var claim = new Claim(ClaimName, ClaimName);
             if (!AllClaims.Exists(c => c.Value == claim.Value))
                 AllClaims.Add(claim);

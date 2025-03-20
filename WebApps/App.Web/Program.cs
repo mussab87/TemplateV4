@@ -1,7 +1,14 @@
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+});
 
 var app = builder.Build();
 
@@ -13,12 +20,18 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+
+var Initializer = app.Services.CreateScope().ServiceProvider.GetRequiredService<IDbInitializer>();
+Initializer.InitializeAsync();
 
 app.MapControllerRoute(
     name: "default",
